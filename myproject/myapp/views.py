@@ -1,10 +1,30 @@
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Attraction
 from .serializers import AttractionSerializer
+
+
+# class AttractionAPIView(ListCreateAPIView):
+#     queryset = Attraction.objects.all()
+#     serializer_class = AttractionSerializer
+
+class AttractionAPIList(generics.ListCreateAPIView):
+    queryset = Attraction.objects.all()
+    serializer_class = AttractionSerializer
+
+
+class AttractionAPIUpdate(generics.UpdateAPIView):
+    queryset = Attraction.objects.all()
+    serializer_class = AttractionSerializer
+
+
+class AttractionDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Attraction.objects.all()
+    serializer_class = AttractionSerializer
 
 
 class AttractionAPIView(APIView):
@@ -21,18 +41,24 @@ class AttractionAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
-        attraction_id = kwargs.get('id')
+        pk = kwargs.get("pk", None)
+        if not pk:
+            return Response({"error": "Method DELETE not allowed"})
+        return Response({"post": "delete post " + str(pk)})
+
+    def put(self, request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        if not pk:
+            return Response({"error": "Method PUT not allowed"})
+
         try:
-            attraction = Attraction.objects.get(id=attraction_id)
-            attraction.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Attraction.DoesNotExist:
-            return Response({"Ошибка": "Аттракцион не найден"}, status=status.HTTP_404_NOT_FOUND)
+            instance = Attraction.objects.get(pk=pk)
+        except:
+            return Response({"error": "Object does not exists"})
 
-    def encode(self, data):
-        # Example encode method
-        return data.encode('utf-8')
+        serializer = AttractionSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"post": serializer.data})
 
-    def decode(self, data):
-        # Example decode method
-        return data.decode('utf-8')
+
