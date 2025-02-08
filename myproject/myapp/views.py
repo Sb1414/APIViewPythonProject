@@ -1,11 +1,32 @@
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Attraction
+from rest_framework.viewsets import ModelViewSet
+
+from .models import Attraction, Category
 from .serializers import AttractionSerializer
+
+
+class AttractionAPIViewSet(ModelViewSet):
+    queryset = Attraction.objects.all() # оставляю чтобы basename не задавать
+    serializer_class = AttractionSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+
+        if not pk:
+            return Attraction.objects.all()[:3] # более сложное условие фильтрации сделать
+
+        return Attraction.objects.filter(pk=pk)
+
+    @action(methods=['get'], detail=True)
+    def category(self, request, pk=None):
+        return Response({'categories': Category.objects.all().values()})
+
 
 class AttractionAPIList(generics.ListCreateAPIView):
     queryset = Attraction.objects.all()
