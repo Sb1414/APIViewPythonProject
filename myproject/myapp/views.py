@@ -7,24 +7,19 @@ from rest_framework import status
 from .models import Attraction
 from .serializers import AttractionSerializer
 
-
-# class AttractionAPIView(ListCreateAPIView):
+# class AttractionAPIList(generics.ListCreateAPIView):
 #     queryset = Attraction.objects.all()
 #     serializer_class = AttractionSerializer
-
-class AttractionAPIList(generics.ListCreateAPIView):
-    queryset = Attraction.objects.all()
-    serializer_class = AttractionSerializer
-
-
-class AttractionAPIUpdate(generics.UpdateAPIView):
-    queryset = Attraction.objects.all()
-    serializer_class = AttractionSerializer
-
-
-class AttractionDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Attraction.objects.all()
-    serializer_class = AttractionSerializer
+#
+#
+# class AttractionAPIUpdate(generics.UpdateAPIView):
+#     queryset = Attraction.objects.all()
+#     serializer_class = AttractionSerializer
+#
+#
+# class AttractionDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = Attraction.objects.all()
+#     serializer_class = AttractionSerializer
 
 
 class AttractionAPIView(APIView):
@@ -43,22 +38,22 @@ class AttractionAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
         if not pk:
-            return Response({"error": "Method DELETE not allowed"})
-        return Response({"post": "delete post " + str(pk)})
+            return Response({"Ошибочка": "удаление невозможно"})
+        return Response({"Post": "удалился " + str(pk)})
 
     def put(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
         if not pk:
-            return Response({"error": "Method PUT not allowed"})
+            return Response({"Ошибочка": "put невозможен"})
 
         try:
             instance = Attraction.objects.get(pk=pk)
         except:
-            return Response({"error": "Object does not exists"})
+            return Response({"Ошибочка": "объект не существует"})
 
         serializer = AttractionSerializer(data=request.data, instance=instance)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"post": serializer.data})
+        return Response({"Post": serializer.data})
 
 
